@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.datastax.oss.driver.api.core.uuid.Uuids;
 
+import io.javabrains.inbox.email.Email;
+import io.javabrains.inbox.email.EmailRepository;
 import io.javabrains.inbox.emaillist.EmailListItem;
 import io.javabrains.inbox.emaillist.EmailListItemKey;
 import io.javabrains.inbox.emaillist.EmailListItemRepository;
@@ -30,6 +32,9 @@ public class InboxApp {
 
 	@Autowired
 	EmailListItemRepository emailListItemRepository;
+
+	@Autowired
+	EmailRepository emailRepository;
 
 	public static void main(String[] args) {
 		SpringApplication.run(InboxApp.class, args);
@@ -57,13 +62,23 @@ public class InboxApp {
 
 			EmailListItem item = new EmailListItem(
 				key, 
-				Arrays.asList("DanielSLucas"),
+				Arrays.asList("DanielSLucas", "abc", "def"),
 				"Subject " + i,
 				true,
 				null
 			);
 
 			emailListItemRepository.save(item);
+
+			Email email = new Email(
+				key.getTimeUUID(), 
+				"DanielSLucas",
+				item.getTo(),
+				item.getSubject(),
+				"Body " + i
+			);
+
+			emailRepository.save(email);
 		}
 	}
 
