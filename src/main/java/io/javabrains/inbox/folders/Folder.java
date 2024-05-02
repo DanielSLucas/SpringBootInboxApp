@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Table(value = "folders_by_user")
 public class Folder {
   
-  @PrimaryKeyColumn(name = "name_id", ordinal = 0, type = PrimaryKeyType.PARTITIONED)
+  @PrimaryKeyColumn(name = "user_id", ordinal = 0, type = PrimaryKeyType.PARTITIONED)
   private String id;
 
   @PrimaryKeyColumn(name = "label", ordinal = 1, type = PrimaryKeyType.CLUSTERED)
