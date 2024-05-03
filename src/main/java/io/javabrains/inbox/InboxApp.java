@@ -12,16 +12,9 @@ import org.springframework.boot.autoconfigure.cassandra.CqlSessionBuilderCustomi
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.datastax.oss.driver.api.core.uuid.Uuids;
-
-import io.javabrains.inbox.email.Email;
-import io.javabrains.inbox.email.EmailRepository;
-import io.javabrains.inbox.emaillist.EmailListItem;
-import io.javabrains.inbox.emaillist.EmailListItemKey;
-import io.javabrains.inbox.emaillist.EmailListItemRepository;
+import io.javabrains.inbox.email.EmailService;
 import io.javabrains.inbox.folders.Folder;
 import io.javabrains.inbox.folders.FolderRepository;
-import io.javabrains.inbox.folders.UnreadEmailStatsRepository;
 
 
 @SpringBootApplication
@@ -32,13 +25,7 @@ public class InboxApp {
 	FolderRepository folderRepository;
 
 	@Autowired
-	EmailListItemRepository emailListItemRepository;
-
-	@Autowired
-	EmailRepository emailRepository;
-
-	@Autowired
-	UnreadEmailStatsRepository unreadEmailStatsRepository;
+	EmailService emailService;
 
 	public static void main(String[] args) {
 		SpringApplication.run(InboxApp.class, args);
@@ -52,41 +39,16 @@ public class InboxApp {
 
 	@PostConstruct
 	public void init() {
-		
-		folderRepository.save(new Folder("DanielSLucas", "Inbox", "blue"));
-		folderRepository.save(new Folder("DanielSLucas", "Sent", "green"));
-		folderRepository.save(new Folder("DanielSLucas", "Important", "yellow"));
-
-		unreadEmailStatsRepository.incrementUnreadCount("DanielSLucas", "Inbox");
-		unreadEmailStatsRepository.incrementUnreadCount("DanielSLucas", "Inbox");
-		unreadEmailStatsRepository.incrementUnreadCount("DanielSLucas", "Inbox");
+		folderRepository.save(new Folder("DanielSLucas", "Work", "blue"));
+		folderRepository.save(new Folder("DanielSLucas", "Home", "green"));
+		folderRepository.save(new Folder("DanielSLucas", "Family", "yellow"));
 
 		for (int i = 0; i < 10; i++) {
-			EmailListItemKey key = new EmailListItemKey(
+			emailService.sendEmail(
 				"DanielSLucas", 
-				"Inbox", 
-				Uuids.timeBased()
-			);
-
-			EmailListItem item = new EmailListItem(
-				key, 
-				Arrays.asList("DanielSLucas", "abc", "def"),
-				"Subject " + i,
-				true,
-				null
-			);
-
-			emailListItemRepository.save(item);
-
-			Email email = new Email(
-				key.getTimeUUID(), 
-				"DanielSLucas",
-				item.getTo(),
-				item.getSubject(),
-				"Body " + i
-			);
-
-			emailRepository.save(email);
+				Arrays.asList("DanielSLucas", "abc"), 
+				"Hello " + i, 
+				"Body " + i);
 		}
 	}
 

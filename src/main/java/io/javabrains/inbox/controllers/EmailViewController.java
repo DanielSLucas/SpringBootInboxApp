@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import io.javabrains.inbox.email.Email;
 import io.javabrains.inbox.email.EmailRepository;
-import io.javabrains.inbox.emaillist.EmailListItemRepository;
 import io.javabrains.inbox.folders.Folder;
 import io.javabrains.inbox.folders.FolderRepository;
 import io.javabrains.inbox.folders.FolderService;
@@ -49,6 +48,9 @@ public class EmailViewController {
     
     model.addAttribute("defaultFolders", defaultFolders);
     model.addAttribute("userFolders", userFolders);
+
+    // Folder counters
+    model.addAttribute("stats", folderService.mapCountToLabel(userId));
 
     Optional<Email> optionalEmail = emailRepository.findById(id);
 

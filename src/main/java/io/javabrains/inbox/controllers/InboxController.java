@@ -53,6 +53,9 @@ public class InboxController {
     model.addAttribute("defaultFolders", defaultFolders);
     model.addAttribute("userFolders", userFolders);
 
+    // Folder counters
+    model.addAttribute("stats", folderService.mapCountToLabel(userId));
+
     // Fetch messages
     if (!StringUtils.hasText(folder)) {
       folder = "Inbox";
