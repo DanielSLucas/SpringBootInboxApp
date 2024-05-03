@@ -53,6 +53,7 @@ public class EmailViewController {
     } 
     
     String userId = principal.getAttribute("login");
+    model.addAttribute("userName", principal.getAttribute("name"));
     
     // Fetch folders
     List<Folder> defaultFolders = folderService.fetchDefaultFolders(userId);
