@@ -12,12 +12,17 @@ import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import io.javabrains.inbox.email.Email;
 import io.javabrains.inbox.email.EmailRepository;
+import io.javabrains.inbox.emaillist.EmailListItem;
+import io.javabrains.inbox.emaillist.EmailListItemKey;
+import io.javabrains.inbox.emaillist.EmailListItemRepository;
 import io.javabrains.inbox.folders.Folder;
 import io.javabrains.inbox.folders.FolderRepository;
 import io.javabrains.inbox.folders.FolderService;
+import io.javabrains.inbox.folders.UnreadEmailStatsRepository;
 
 @Controller
 public class EmailViewController {
@@ -30,8 +35,15 @@ public class EmailViewController {
   @Autowired
 	private EmailRepository emailRepository;
 
+  @Autowired
+  private EmailListItemRepository emailListItemRepository;
+
+  @Autowired
+  private UnreadEmailStatsRepository unreadEmailStatsRepository;
+
   @GetMapping(value = "/emails/{id}")
   public String emailView(
+    @RequestParam String folder,
     @PathVariable UUID id,
     @AuthenticationPrincipal OAuth2User principal,
     Model model
@@ -49,9 +61,6 @@ public class EmailViewController {
     model.addAttribute("defaultFolders", defaultFolders);
     model.addAttribute("userFolders", userFolders);
 
-    // Folder counters
-    model.addAttribute("stats", folderService.mapCountToLabel(userId));
-
     Optional<Email> optionalEmail = emailRepository.findById(id);
 
     if (!optionalEmail.isPresent()) {
@@ -63,6 +72,27 @@ public class EmailViewController {
 
     model.addAttribute("email", email);
     model.addAttribute("toIds", toIds);
+
+    EmailListItemKey key = new EmailListItemKey(
+      userId,
+      folder,
+      email.getId()
+    );
+
+    Optional<EmailListItem> optionalEmailListItem = emailListItemRepository.findById(key);
+
+    if (optionalEmailListItem.isPresent()) {
+      EmailListItem emailListItem = optionalEmailListItem.get();
+
+      if (emailListItem.isUnread()) {
+        emailListItem.setUnread(false);
+        emailListItemRepository.save(emailListItem);
+        unreadEmailStatsRepository.decrementUnreadCount(userId, folder);
+      }
+    }
+
+    // Folder counters
+    model.addAttribute("stats", folderService.mapCountToLabel(userId));
 
     return "email";
   }
